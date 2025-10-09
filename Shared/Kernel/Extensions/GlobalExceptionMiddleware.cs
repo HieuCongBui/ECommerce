@@ -62,13 +62,19 @@ namespace Ecommerce.Shared.Contract.Extensions
                 innerException = env.IsDevelopment() && ex.InnerException != null ? ex.InnerException.Message : null
             };
 
-            var json = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = env.IsDevelopment()
-            });
+            JsonOptions.WriteIndented = _env.IsDevelopment();
+
+            var json = JsonSerializer.Serialize(errorResponse, JsonOptions);
 
             await context.Response.WriteAsync(json);
         }
+
+        #region Helpers Methods
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
+        };
+        #endregion
     }
 }

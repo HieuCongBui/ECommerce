@@ -1,4 +1,5 @@
 using Ecommerce.Cart.Presentation.Extensions;
+using Ecommerce.Shared.Contract.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +36,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Map controllers
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 app.MapControllers();
 
 app.Run();

@@ -1,4 +1,5 @@
-﻿using Ecommerce.Cart.Domain.Abstractions;
+﻿using Ecommerce.Cart.Application.DTOs;
+using Ecommerce.Cart.Domain.Abstractions;
 using Ecommerce.Cart.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +19,9 @@ namespace Ecommerce.Cart.Application.Services
         public async Task<CustomerCart?> GetCartAsync(string customerId)
         {
             if (string.IsNullOrWhiteSpace(customerId))
+            {
                 throw new ArgumentException("Customer ID cannot be null or empty", nameof(customerId));
+            }
 
             try
             {
@@ -33,22 +36,32 @@ namespace Ecommerce.Cart.Application.Services
             }
         }
 
-        public async Task<CustomerCart> AddItemToCartAsync(string customerId, Guid productId, string productName, decimal unitPrice, int quantity, string pictureUrl)
+        public async Task<CustomerCart> AddItemToCartAsync(AddItemToCartRequest request)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             try
             {
-                var cart = await _repository.GetCartAsync(customerId) ?? new CustomerCart(customerId);
+                var cart = await _repository.GetCartAsync(request.CustomerId) ?? new CustomerCart(request.CustomerId);
 
-                cart.AddItem(productId, productName, unitPrice, quantity, pictureUrl ?? string.Empty);
+                cart.AddItem(
+                    request.ProductId, 
+                    request.ProductName, 
+                    request.UnitPrice, 
+                    request.GetOldUnitPrice(), 
+                    request.Quantity, 
+                    request.PictureUrl ?? string.Empty);
                 
                 var updatedCart = await _repository.UpdateCartAsync(cart);
-                _logger.LogInformation("Added item {ProductId} to cart for customer {CustomerId}", productId, customerId);
+                _logger.LogInformation("Added item {ProductId} to cart for customer {CustomerId}", 
+                    request.ProductId, request.CustomerId);
                 
                 return updatedCart;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding item {ProductId} to cart for customer {CustomerId}", productId, customerId);
+                _logger.LogError(ex, "Error adding item {ProductId} to cart for customer {CustomerId}", 
+                    request.ProductId, request.CustomerId);
                 throw;
             }
         }
@@ -74,11 +87,6 @@ namespace Ecommerce.Cart.Application.Services
                 
                 return updatedCart;
             }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogWarning("Item {ProductId} not found in cart for customer {CustomerId}: {Message}", productId, customerId, ex.Message);
-                throw;
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error removing item {ProductId} from cart for customer {CustomerId}", productId, customerId);
@@ -86,38 +94,31 @@ namespace Ecommerce.Cart.Application.Services
             }
         }
 
-        public async Task<CustomerCart?> UpdateItemQuantityAsync(string customerId, Guid productId, int newQuantity)
+        public async Task<CustomerCart?> UpdateItemQuantityAsync(UpdateItemQuantityRequest request)
         {
-            if (string.IsNullOrWhiteSpace(customerId))
-                throw new ArgumentException("Customer ID cannot be null or empty", nameof(customerId));
-
-            if (newQuantity <= 0)
-                throw new ArgumentException("Quantity must be greater than zero", nameof(newQuantity));
+            ArgumentNullException.ThrowIfNull(request);
 
             try
             {
-                var cart = await _repository.GetCartAsync(customerId);
+                var cart = await _repository.GetCartAsync(request.CustomerId);
                 if (cart == null)
                 {
-                    _logger.LogWarning("Cart not found for customer {CustomerId}", customerId);
+                    _logger.LogWarning("Cart not found for customer {CustomerId}", request.CustomerId);
                     return null;
                 }
 
-                cart.UpdateItemQuantity(productId, newQuantity);
+                cart.UpdateItemQuantity(request.ProductId, request.Quantity);
                 
                 var updatedCart = await _repository.UpdateCartAsync(cart);
-                _logger.LogInformation("Updated quantity for item {ProductId} in cart for customer {CustomerId}", productId, customerId);
+                _logger.LogInformation("Updated quantity for item {ProductId} in cart for customer {CustomerId}", 
+                    request.ProductId, request.CustomerId);
                 
                 return updatedCart;
             }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogWarning("Item {ProductId} not found in cart for customer {CustomerId}: {Message}", productId, customerId, ex.Message);
-                throw;
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating item {ProductId} quantity in cart for customer {CustomerId}", productId, customerId);
+                _logger.LogError(ex, "Error updating item {ProductId} quantity in cart for customer {CustomerId}", 
+                    request.ProductId, request.CustomerId);
                 throw;
             }
         }

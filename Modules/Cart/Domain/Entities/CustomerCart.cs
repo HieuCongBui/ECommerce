@@ -23,7 +23,7 @@ namespace Ecommerce.Cart.Domain.Entities
             _items = items?.ToList() ?? new List<CartItem>();
         }
 
-        public void AddItem(Guid productId, string productName, decimal unitPrice, int quantity, string pictureUrl)
+        public void AddItem(Guid productId, string productName, decimal unitPrice, decimal oldUnitPrice, int quantity, string pictureUrl)
         {
             if (quantity <= 0)
             {
@@ -34,7 +34,7 @@ namespace Ecommerce.Cart.Domain.Entities
 
             if (existingItem is null)
             {
-                var newItem = new CartItem(productId, productName, unitPrice, quantity, pictureUrl);
+                var newItem = new CartItem(productId, productName, unitPrice, oldUnitPrice, quantity, pictureUrl);
                 _items.Add(newItem);
             }
             else

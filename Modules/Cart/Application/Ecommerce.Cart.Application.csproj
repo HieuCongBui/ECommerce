@@ -11,7 +11,7 @@
     <Folder Include="Features\Queries\" />
     <Folder Include="IntegrationEvents\EventHandling\" />
     <Folder Include="IntegrationEvents\Events\" />
-    <Folder Include="DTOs\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,7 +12,7 @@ namespace Ecommerce.Cart.Infrastructure.Persistence.Repositories
     {
         private readonly TimeSpan DefaultTimeExpiration = TimeSpan.FromMinutes(15);
 
-        private static RedisKey RedisKeyPrefix = "cart:"u8.ToArray();
+        private static RedisKey RedisKeyPrefix = "Cart:"u8.ToArray();
         private static RedisKey GetCartKey(string customerId) => RedisKeyPrefix.Append(System.Text.Encoding.UTF8.GetBytes(customerId));
 
         public async Task<bool> DeleteCartAsync(string customerId, CancellationToken cancellationToken = default)

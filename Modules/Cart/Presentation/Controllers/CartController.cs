@@ -1,8 +1,8 @@
+using Ecommerce.Cart.Application.DTOs;
 using Ecommerce.Cart.Application.Services;
 using Ecommerce.Cart.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 
 namespace Ecommerce.Cart.Presentation.Controllers;
 
@@ -39,14 +39,18 @@ public class CartController : ControllerBase
     {
         try
         {
-            var cart = await _cartService.AddItemToCartAsync(
-                customerId,
-                request.ProductId,
-                request.ProductName,
-                request.UnitPrice,
-                request.Quantity,
-                request.PictureUrl);
+            var addItemRequest = new AddItemToCartRequest
+            {
+                CustomerId = customerId,
+                ProductId = request.ProductId,
+                ProductName = request.ProductName,
+                UnitPrice = request.UnitPrice,
+                OldUnitPrice = request.OldUnitPrice > 0 ? request.OldUnitPrice : null,
+                Quantity = request.Quantity,
+                PictureUrl = request.PictureUrl
+            };
 
+            var cart = await _cartService.AddItemToCartAsync(addItemRequest);
             return Ok(cart);
         }
         catch (ArgumentException ex)
@@ -73,7 +77,14 @@ public class CartController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<ActionResult<CustomerCart>> UpdateItemQuantity(string customerId, Guid productId, [FromBody] UpdateQuantityRequest request)
     {
-        var cart = await _cartService.UpdateItemQuantityAsync(customerId, productId, request.Quantity);
+        var updateRequest = new UpdateItemQuantityRequest
+        {
+            CustomerId = customerId,
+            ProductId = productId,
+            Quantity = request.Quantity
+        };
+
+        var cart = await _cartService.UpdateItemQuantityAsync(updateRequest);
         if (cart == null)
         {
             return NotFound($"Cart not found for customer {customerId}");
@@ -111,11 +122,13 @@ public class CartController : ControllerBase
     }
 }
 
+#region Helpers
 public record AddItemRequest
 {
     public Guid ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }
+    public decimal OldUnitPrice { get; set; }
     public int Quantity { get; set; }
     public string? PictureUrl { get; set; }
 }
@@ -124,3 +137,4 @@ public record UpdateQuantityRequest
 {
     public int Quantity { get; set; }
 }
+#endregion
