@@ -1,4 +1,6 @@
-﻿namespace Ecommerce.Cart.Domain.Entities
+﻿using Ecommerce.Cart.Domain.Exceptions;
+
+namespace Ecommerce.Cart.Domain.Entities
 {
     public class CartItem
     {
@@ -12,18 +14,18 @@
         public CartItem(Guid productId, string productName, decimal unitPrice, decimal oldUnitPrice, int quantity, string pictureUrl)
         {
             if (quantity <= 0)
-            { 
-                throw new ArgumentException("Quantity must be greater than zero");
+            {
+                throw new InvalidCartItemQuantityException(productId, quantity);
             }
 
             if (unitPrice < 0)
             {
-                throw new ArgumentException("Unit price cannot be negative");
+                throw new InvalidCartItemPriceException(productId, unitPrice);
             }
 
             if (string.IsNullOrWhiteSpace(productName))
             {
-                throw new ArgumentException("Product name is required");
+                throw new ArgumentException("Product name is required", nameof(productName));
             }
 
             ProductId = productId;
@@ -31,15 +33,16 @@
             UnitPrice = unitPrice;
             OldUnitPrice = oldUnitPrice;
             Quantity = quantity;
-            PictureUrl = pictureUrl;
+            PictureUrl = pictureUrl ?? string.Empty;
         }
 
         public void AddUnits(int units)
         {
             if (units <= 0)
             {
-                throw new ArgumentException("Units must be greater than zero");
+                throw new InvalidCartItemQuantityException($"Units to add must be greater than zero. Attempted to add: {units}");
             }
+
             Quantity += units;
         }
 
@@ -47,8 +50,9 @@
         {
             if (newQuantity <= 0)
             {
-                throw new ArgumentException("Quantity must be greater than zero");
+                throw new InvalidCartItemQuantityException(ProductId, newQuantity);
             }
+
             Quantity = newQuantity;
         }
 

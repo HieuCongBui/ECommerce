@@ -1,4 +1,5 @@
 ﻿using Ecommerce.Cart.Domain.Abstractions;
+using Ecommerce.Cart.Domain.Exceptions;
 using System.Text.Json.Serialization;
 
 namespace Ecommerce.Cart.Domain.Entities
@@ -14,12 +15,22 @@ namespace Ecommerce.Cart.Domain.Entities
         public CustomerCart(string customerId)
         {
             CustomerId = customerId ?? throw new ArgumentNullException(nameof(customerId));
+
+            if (string.IsNullOrWhiteSpace(customerId))
+            {
+                throw new EmptyCustomerIdException();
+            }
         }
 
         [JsonConstructor]
         public CustomerCart(string customerId, IReadOnlyCollection<CartItem> items)
         {
             CustomerId = customerId ?? throw new ArgumentNullException(nameof(customerId));
+            if (string.IsNullOrWhiteSpace(customerId))
+            {
+                throw new EmptyCustomerIdException();
+            }
+            
             _items = items?.ToList() ?? new List<CartItem>();
         }
 
@@ -27,7 +38,7 @@ namespace Ecommerce.Cart.Domain.Entities
         {
             if (quantity <= 0)
             {
-                throw new ArgumentException("Quantity must be greater than zero");
+                throw new InvalidCartItemQuantityException(productId, quantity);
             }
 
             var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
@@ -49,7 +60,7 @@ namespace Ecommerce.Cart.Domain.Entities
 
             if (item is null)
             {
-                throw new InvalidOperationException("Item not found in cart");
+                throw new CartItemNotFoundException(CustomerId, productId);
             }
 
             _items.Remove(item);
@@ -61,7 +72,7 @@ namespace Ecommerce.Cart.Domain.Entities
 
             if (item is null)
             {
-                throw new InvalidOperationException("Item not found in cart");
+                throw new CartItemNotFoundException(CustomerId, productId);
             }
 
             item.UpdateQuantity(newQuantity);

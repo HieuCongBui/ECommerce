@@ -22,19 +22,17 @@ public class CartController : ControllerBase
     [HttpGet("{customerId}")]
     [ProducesResponseType(typeof(CustomerCart), 200)]
     [ProducesResponseType(404)]
+    [ProducesResponseType(400)]
     public async Task<ActionResult<CustomerCart>> GetCart(string customerId)
     {
         var cart = await _cartService.GetCartAsync(customerId);
-        if (cart == null)
-        {
-            return NotFound($"Cart not found for customer {customerId}");
-        }
         return Ok(cart);
     }
 
     [HttpPost("{customerId}/items")]
     [ProducesResponseType(typeof(CustomerCart), 200)]
     [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
     public async Task<ActionResult<CustomerCart>> AddItemToCart(string customerId, [FromBody] AddItemRequest request)
     {
         var addItemRequest = new AddItemToCartRequest
@@ -55,19 +53,19 @@ public class CartController : ControllerBase
     [HttpDelete("{customerId}/items/{productId}")]
     [ProducesResponseType(typeof(CustomerCart), 200)]
     [ProducesResponseType(404)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
     public async Task<ActionResult<CustomerCart>> RemoveItemFromCart(string customerId, Guid productId)
     {
         var cart = await _cartService.RemoveItemFromCartAsync(customerId, productId);
-        if (cart == null)
-        {
-            return NotFound($"Cart not found for customer {customerId}");
-        }
         return Ok(cart);
     }
 
     [HttpPut("{customerId}/items/{productId}/quantity")]
     [ProducesResponseType(typeof(CustomerCart), 200)]
     [ProducesResponseType(404)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
     public async Task<ActionResult<CustomerCart>> UpdateItemQuantity(string customerId, Guid productId, [FromBody] UpdateQuantityRequest request)
     {
         var updateRequest = new UpdateItemQuantityRequest
@@ -78,30 +76,26 @@ public class CartController : ControllerBase
         };
 
         var cart = await _cartService.UpdateItemQuantityAsync(updateRequest);
-        if (cart == null)
-        {
-            return NotFound($"Cart not found for customer {customerId}");
-        }
         return Ok(cart);
     }
 
     [HttpDelete("{customerId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
     public async Task<ActionResult> ClearCart(string customerId)
     {
-        var result = await _cartService.ClearCartAsync(customerId);
-        if (!result)
-        {
-            return NotFound($"Cart not found for customer {customerId}");
-        }
+        await _cartService.ClearCartAsync(customerId);
         return NoContent();
     }
 
     [HttpGet("{customerId}/total")]
-    [ProducesResponseType(typeof(decimal), 200)]
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(404)]
     [ProducesResponseType(400)]
-    public async Task<ActionResult<decimal>> GetCartTotal(string customerId)
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<object>> GetCartTotal(string customerId)
     {
         var total = await _cartService.GetCartTotalAsync(customerId);
         return Ok(new { Total = total });
