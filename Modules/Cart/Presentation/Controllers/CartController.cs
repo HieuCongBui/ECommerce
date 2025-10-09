@@ -37,26 +37,19 @@ public class CartController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<ActionResult<CustomerCart>> AddItemToCart(string customerId, [FromBody] AddItemRequest request)
     {
-        try
+        var addItemRequest = new AddItemToCartRequest
         {
-            var addItemRequest = new AddItemToCartRequest
-            {
-                CustomerId = customerId,
-                ProductId = request.ProductId,
-                ProductName = request.ProductName,
-                UnitPrice = request.UnitPrice,
-                OldUnitPrice = request.OldUnitPrice > 0 ? request.OldUnitPrice : null,
-                Quantity = request.Quantity,
-                PictureUrl = request.PictureUrl
-            };
+            CustomerId = customerId,
+            ProductId = request.ProductId,
+            ProductName = request.ProductName,
+            UnitPrice = request.UnitPrice,
+            OldUnitPrice = request.OldUnitPrice > 0 ? request.OldUnitPrice : null,
+            Quantity = request.Quantity,
+            PictureUrl = request.PictureUrl
+        };
 
-            var cart = await _cartService.AddItemToCartAsync(addItemRequest);
-            return Ok(cart);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var cart = await _cartService.AddItemToCartAsync(addItemRequest);
+        return Ok(cart);
     }
 
     [HttpDelete("{customerId}/items/{productId}")]
@@ -110,15 +103,8 @@ public class CartController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<ActionResult<decimal>> GetCartTotal(string customerId)
     {
-        try
-        {
-            var total = await _cartService.GetCartTotalAsync(customerId);
-            return Ok(new { Total = total });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var total = await _cartService.GetCartTotalAsync(customerId);
+        return Ok(new { Total = total });
     }
 }
 
