@@ -61,7 +61,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Search.Presentati
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{4F52FD11-658E-A102-6CD3-7D7C16FFA15B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Shared.Contract", "Shared\Kernel\Ecommerce.Shared.Contract.csproj", "{71B12C2D-EEB6-4AD5-BA14-7974085C5671}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Shared.Contract", "Shared\Ecommerce.Shared.Contract\Ecommerce.Shared.Contract.csproj", "{71B12C2D-EEB6-4AD5-BA14-7974085C5671}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -69,7 +69,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D8E9241D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{42642997-2378-4A39-BCAF-72DCF0523C35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Shared.EventBus", "Ecommerce.Shared.EventBus\Ecommerce.Shared.EventBus.csproj", "{BA0F94DD-BC04-450E-BB6A-625A79CB1A4D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Shared.EventBus", "Shared\Ecommerce.Shared.EventBus\Ecommerce.Shared.EventBus.csproj", "{BA0F94DD-BC04-450E-BB6A-625A79CB1A4D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerce.Catalog.Tests", "..\tests\ECommerce.Catalog.Tests\ECommerce.Catalog.Tests.csproj", "{BD817CBC-1B6F-4CC5-A29E-DD6E0006FC4F}"
 EndProject
