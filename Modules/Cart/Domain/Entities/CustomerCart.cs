@@ -15,32 +15,18 @@ namespace Ecommerce.Cart.Domain.Entities
         public CustomerCart(string customerId)
         {
             CustomerId = customerId ?? throw new ArgumentNullException(nameof(customerId));
-
-            if (string.IsNullOrWhiteSpace(customerId))
-            {
-                throw new EmptyCustomerIdException();
-            }
         }
 
         [JsonConstructor]
         public CustomerCart(string customerId, IReadOnlyCollection<CartItem> items)
         {
             CustomerId = customerId ?? throw new ArgumentNullException(nameof(customerId));
-            if (string.IsNullOrWhiteSpace(customerId))
-            {
-                throw new EmptyCustomerIdException();
-            }
             
             _items = items?.ToList() ?? new List<CartItem>();
         }
 
         public void AddItem(Guid productId, string productName, decimal unitPrice, decimal oldUnitPrice, int quantity, string pictureUrl)
         {
-            if (quantity <= 0)
-            {
-                throw new InvalidCartItemQuantityException(productId, quantity);
-            }
-
             var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
 
             if (existingItem is null)

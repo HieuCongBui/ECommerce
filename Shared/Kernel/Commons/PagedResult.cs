@@ -1,4 +1,4 @@
-﻿namespace Ecommerce.Shared.Contract.Shared
+﻿namespace Ecommerce.Shared.Contract.Commons
 {
     public class PagedResult<TEntity>
     {

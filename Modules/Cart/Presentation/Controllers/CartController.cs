@@ -1,120 +1,143 @@
 using Ecommerce.Cart.Application.DTOs;
 using Ecommerce.Cart.Application.Services;
 using Ecommerce.Cart.Domain.Entities;
+using Ecommerce.Shared.Contract.Commons;
+using Ecommerce.Shared.Contract.Extensions;
+using Ecommerce.Cart.Application.Constants;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using System.Net;
+using Ecommerce.Shared.Contract.Abtractions.Enums;
 
 namespace Ecommerce.Cart.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CartController : ControllerBase
+public class CartController(CartService cartService, IValidationService validationService) : ControllerBase
 {
-    private readonly CartService _cartService;
-    private readonly ILogger<CartController> _logger;
-
-    public CartController(CartService cartService, ILogger<CartController> logger)
-    {
-        _cartService = cartService ?? throw new ArgumentNullException(nameof(cartService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly CartService _cartService = cartService;
+    private readonly IValidationService _validationService = validationService;
 
     [HttpGet("{customerId}")]
     [ProducesResponseType(typeof(CustomerCart), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(400)]
-    public async Task<ActionResult<CustomerCart>> GetCart(string customerId)
+    public async Task<IActionResult> GetCart(string customerId)
     {
-        var cart = await _cartService.GetCartAsync(customerId);
-        return Ok(cart);
+        var result = await _cartService.GetCartAsync(customerId);
+        
+        return result.Match(
+            onSuccess: value => Ok(result),
+            onFailure: error => MapErrorToActionResult(error)
+        );
     }
 
     [HttpPost("{customerId}/items")]
-    [ProducesResponseType(typeof(CustomerCart), 200)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult<CustomerCart>> AddItemToCart(string customerId, [FromBody] AddItemRequest request)
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+    public async Task<IActionResult> AddItemToCart(string customerId, [FromBody] CartItemRequest request)
     {
-        var addItemRequest = new AddItemToCartRequest
-        {
-            CustomerId = customerId,
-            ProductId = request.ProductId,
-            ProductName = request.ProductName,
-            UnitPrice = request.UnitPrice,
-            OldUnitPrice = request.OldUnitPrice > 0 ? request.OldUnitPrice : null,
-            Quantity = request.Quantity,
-            PictureUrl = request.PictureUrl
-        };
+        var validationResult = await _validationService.ValidateAsync(request);
 
-        var cart = await _cartService.AddItemToCartAsync(addItemRequest);
-        return Ok(cart);
+        if (!validationResult.IsValid)
+        {
+            var errorsMessages = string.Join(";", validationResult.Errors.Select(e => e.ErrorMessage));
+            var validationError = CartErrors.CustomValidation("RequestValidation", errorsMessages);
+            return MapErrorToActionResult(validationError);
+        }
+
+        var result = await _cartService.AddItemToCartAsync(customerId, request);
+        
+        return result.Match(
+            onSuccess: value => Ok(result),
+            onFailure: error => MapErrorToActionResult(error)
+        );
     }
 
     [HttpDelete("{customerId}/items/{productId}")]
-    [ProducesResponseType(typeof(CustomerCart), 200)]
-    [ProducesResponseType(404)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult<CustomerCart>> RemoveItemFromCart(string customerId, Guid productId)
+    [ProducesResponseType(typeof(CustomerCart),(int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+    public async Task<IActionResult> RemoveItemFromCart(string customerId, Guid productId)
     {
-        var cart = await _cartService.RemoveItemFromCartAsync(customerId, productId);
-        return Ok(cart);
+        var result = await _cartService.RemoveItemFromCartAsync(customerId, productId);
+        
+        return result.Match(
+            onSuccess : value => Ok(result),
+            onFailure: error => MapErrorToActionResult(error)
+        );
     }
 
     [HttpPut("{customerId}/items/{productId}/quantity")]
-    [ProducesResponseType(typeof(CustomerCart), 200)]
-    [ProducesResponseType(404)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult<CustomerCart>> UpdateItemQuantity(string customerId, Guid productId, [FromBody] UpdateQuantityRequest request)
+    [ProducesResponseType(typeof(CustomerCart),(int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+    public async Task<IActionResult> UpdateItemQuantity(string customerId, Guid productId, [FromBody] UpdateItemQuantityRequest request)
     {
-        var updateRequest = new UpdateItemQuantityRequest
-        {
-            CustomerId = customerId,
-            ProductId = productId,
-            Quantity = request.Quantity
-        };
+        var validationResult = await _validationService.ValidateAsync(request);
 
-        var cart = await _cartService.UpdateItemQuantityAsync(updateRequest);
-        return Ok(cart);
+        if (!validationResult.IsValid)
+        {
+            var errorsMessages = string.Join(";", validationResult.Errors.Select(e => e.ErrorMessage));
+            var validationError = CartErrors.CustomValidation("RequestValidation", errorsMessages);
+            return MapErrorToActionResult(validationError);
+        }
+
+        var result = await _cartService.UpdateItemQuantityAsync(customerId, productId, request);
+        
+        return result.Match(
+            onSuccess: value => Ok(result),
+            onFailure: error => MapErrorToActionResult(error)
+        );
     }
 
     [HttpDelete("{customerId}")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(404)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult> ClearCart(string customerId)
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+    public async Task<IActionResult> ClearCart(string customerId)
     {
-        await _cartService.ClearCartAsync(customerId);
-        return NoContent();
+        var result = await _cartService.ClearCartAsync(customerId);
+        
+        return result.Match(
+            onSuccess: () => NoContent(),
+            onFailure: error => MapErrorToActionResult(error)
+        );
     }
 
     [HttpGet("{customerId}/total")]
-    [ProducesResponseType(typeof(object), 200)]
-    [ProducesResponseType(404)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult<object>> GetCartTotal(string customerId)
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+    public async Task<IActionResult> GetCartTotal(string customerId)
     {
-        var total = await _cartService.GetCartTotalAsync(customerId);
-        return Ok(new { Total = total });
+        var result = await _cartService.GetCartTotalAsync(customerId);
+        
+        return result.Match(
+            onSuccess: total => Ok(new { Total = total }),
+            onFailure: error => MapErrorToActionResult(error)
+        );
     }
-}
 
-#region Helpers
-public record AddItemRequest
-{
-    public Guid ProductId { get; set; }
-    public string ProductName { get; set; } = string.Empty;
-    public decimal UnitPrice { get; set; }
-    public decimal OldUnitPrice { get; set; }
-    public int Quantity { get; set; }
-    public string? PictureUrl { get; set; }
-}
+    #region Wrapper method
+    private IActionResult MapErrorToActionResult(Error error)
+    {
+        var errorResponse = new { error = error.Description, code = error.Code };
 
-public record UpdateQuantityRequest
-{
-    public int Quantity { get; set; }
+        return error.ErrorType switch
+        {
+            ErrorType.Validation => BadRequest(errorResponse),
+            ErrorType.NotFound => NotFound(errorResponse),
+            ErrorType.Conflict => Conflict(errorResponse),
+            ErrorType.AccessUnAuthorized => Unauthorized(errorResponse),
+            ErrorType.AccessForbidden => StatusCode(403, errorResponse),
+            ErrorType.Failure => StatusCode(500, errorResponse),
+            _ => StatusCode(500, errorResponse)
+        };
+    }
+    #endregion
 }
-#endregion
