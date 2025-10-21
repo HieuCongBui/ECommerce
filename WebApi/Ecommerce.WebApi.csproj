@@ -20,4 +20,8 @@
     <ProjectReference Include="..\Shared\Ecommerce.Shared.DataAccess\Ecommerce.Shared.DataAccess.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>
