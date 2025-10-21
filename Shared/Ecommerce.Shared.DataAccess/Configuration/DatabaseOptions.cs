@@ -7,6 +7,10 @@
         public bool EnableRetryOnFailure { get; set; } = true;
         public int MaxRetryCount { get; set; } = 3;
         public TimeSpan MaxRetryDelay { get; set; } = TimeSpan.FromSeconds(30);
+        
+        // Schema configuration for modules
+        public Dictionary<string, string> ModuleSchemas { get; set; } = new();
+        public string DefaultSchema { get; set; } = "public";
     }
 
     public enum DatabaseProviderType

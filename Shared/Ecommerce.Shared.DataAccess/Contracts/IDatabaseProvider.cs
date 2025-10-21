@@ -9,6 +9,7 @@ namespace Ecommerce.Shared.DataAccess.Contracts
         string ProviderName { get; }
         DbConnection CreateConnection(string connectionString);
         void ConfigureOptions(DbContextOptionsBuilder optionsBuilder, string connectionString, Assembly migrationAssembly);
+        void ConfigureOptions(DbContextOptionsBuilder optionsBuilder, string connectionString, Assembly migrationAssembly, string? schema);
         void ApplyNamingConventions(DbContextOptionsBuilder optionsBuilder);
     }
 }

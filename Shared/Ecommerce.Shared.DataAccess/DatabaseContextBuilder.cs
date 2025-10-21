@@ -22,10 +22,22 @@ namespace Ecommerce.Shared.DataAccess
 
         public void ConfigureContext(DbContextOptionsBuilder optionsBuilder)
         {
-            // Configure the database provider
-            _databaseProvider.ConfigureOptions(optionsBuilder, _connectionString, _migrationAssembly);
+            ConfigureContext(optionsBuilder, null);
+        }
 
-            // Apply naming conventions if any
+        public void ConfigureContext(DbContextOptionsBuilder optionsBuilder, string? schema)
+        {
+            // Configure the database provider with schema
+            if (!string.IsNullOrWhiteSpace(schema))
+            {
+                _databaseProvider.ConfigureOptions(optionsBuilder, _connectionString, _migrationAssembly, schema);
+            }
+            else
+            {
+                _databaseProvider.ConfigureOptions(optionsBuilder, _connectionString, _migrationAssembly);
+            }
+
+            // Apply naming conventions
             _databaseProvider.ApplyNamingConventions(optionsBuilder);
 
             // Common configurations for all providers

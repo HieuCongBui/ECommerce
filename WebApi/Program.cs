@@ -1,4 +1,3 @@
-using Ecommerce.Cart.Presentation.Extensions;
 using Ecommerce.Shared.Contract.Extensions;
 using Ecommerce.Shared.DataAccess.Extensions;
 using System.Reflection;

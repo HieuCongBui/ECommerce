@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Ecommerce.Shared.DataAccess\Ecommerce.Shared.DataAccess.csproj" />
     <ProjectReference Include="..\Application\Ecommerce.Catalog.Application.csproj" />
     <ProjectReference Include="..\Domain\Ecommerce.Catalog.Domain.csproj" />
   </ItemGroup>
