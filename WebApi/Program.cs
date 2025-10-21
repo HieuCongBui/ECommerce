@@ -1,22 +1,21 @@
 using Ecommerce.Cart.Presentation.Extensions;
 using Ecommerce.Shared.Contract.Extensions;
+using Ecommerce.Shared.DataAccess.Extensions;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
-// Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Add controllers
 builder.Services.AddControllers();
 
-// Add Cart module with Redis
-var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
-builder.Services.AddCartModule(redisConnectionString);
+// Register Database services
+builder.Services.AddDatabase(
+    builder.Configuration,
+    Assembly.GetExecutingAssembly(), // get assembly containing migrations
+    "Database" // Section name in appsettings.json
+);
 
 var app = builder.Build();
 

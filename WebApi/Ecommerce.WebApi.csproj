@@ -17,6 +17,7 @@
     <ProjectReference Include="..\Modules\Store\Presentation\Ecommerce.Store.Presentation.csproj" />
     <ProjectReference Include="..\Modules\Notification\Presentation\Ecommerce.Notification.Presentation.csproj" />
     <ProjectReference Include="..\Modules\Search\Presentation\Ecommerce.Search.Presentation.csproj" />
+    <ProjectReference Include="..\Shared\Ecommerce.Shared.DataAccess\Ecommerce.Shared.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>
