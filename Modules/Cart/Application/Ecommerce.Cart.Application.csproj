@@ -7,11 +7,14 @@
 
   <ItemGroup>
     <Folder Include="Behaviors\" />
+    <Folder Include="Constants\" />
     <Folder Include="Features\Commands\" />
     <Folder Include="Features\Queries\" />
     <Folder Include="IntegrationEvents\EventHandling\" />
     <Folder Include="IntegrationEvents\Events\" />
+    <Folder Include="Responses\" />
     <Folder Include="Services\" />
+    <Folder Include="Validations\" />
   </ItemGroup>
 
   <ItemGroup>

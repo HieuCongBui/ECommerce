@@ -1,22 +1,57 @@
-﻿namespace Ecommerce.Shared.Contract.Commons
-{
-    public class PagedResult<TEntity>
-    {
-        public IReadOnlyList<TEntity> Items { get; }
-        public int TotalCount { get; }
-        public int PageIndex { get; }
-        public int PageSize { get; }
-        public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+﻿using Microsoft.EntityFrameworkCore;
 
-        public PagedResult(IReadOnlyList<TEntity> items, int totalCount, int pageIndex, int pageSize)
+namespace Ecommerce.Shared.Contract.Commons
+{
+    public class PagedResult<T>
+    {
+        public const int UpperPageSize = 100;
+        public const int DefaultPageSize = 10;
+        public const int DefaultPageIndex = 1;
+
+        private PagedResult(List<T> items, int pageIndex, int pageSize, int totalCount)
         {
             Items = items;
-            TotalCount = totalCount;
             PageIndex = pageIndex;
             PageSize = pageSize;
+            TotalCount = totalCount;
+        }
+
+        public List<T> Items { get; }
+
+        public int PageIndex { get; }
+
+        public int PageSize { get; }
+
+        public int TotalCount { get; }
+
+        public bool HasNextPage => PageIndex * PageSize < TotalCount;
+
+        public bool HasPreviousPage => PageIndex > 1;
+
+        public static async Task<PagedResult<T>> CreateAsync(IQueryable<T> query, int pageIndex, int pageSize)
+        {
+            int totalCount = await query.CountAsync();
+            pageIndex = pageIndex <= 0 ? DefaultPageIndex : pageIndex;
+            pageSize = pageSize <= 0
+                ? totalCount
+                : pageSize > UpperPageSize ? UpperPageSize : pageSize;
+            List<T> items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+            return new PagedResult<T>(items, pageIndex, pageSize, totalCount);
+        }
+
+        public static PagedResult<T> Create(List<T> items, int pageIndex, int pageSize, int totalCount)
+            => new(items, pageIndex, pageSize, totalCount);
+
+        public static async Task<PagedResult<T>> CreateAsync(IEnumerable<T> query, int pageIndex, int pageSize)
+        {
+            pageIndex = pageIndex <= 0 ? DefaultPageIndex : pageIndex;
+            pageSize = pageSize <= 0
+                ? DefaultPageSize
+                : pageSize > UpperPageSize ? UpperPageSize : pageSize;
+
+            int totalCount = query.Count();
+            List<T> items = query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+            return new PagedResult<T>(items, pageIndex, pageSize, totalCount);
         }
     }
-
-    public record PaginationRequest(int pageSize = 10, int pageIndex = 1)
-    { }
 }

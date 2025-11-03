@@ -1,42 +1,52 @@
-﻿using Ecommerce.Shared.Contract.Abtractions.Enums;
+﻿namespace Ecommerce.Shared.Contract.Commons;
 
-namespace Ecommerce.Shared.Contract.Commons
+public class Error : Exception, IEquatable<Error>
 {
-    public class Error
+    public static readonly Error None = new(string.Empty, string.Empty);
+    public static readonly Error NullValue = new("Error.NullValue", "The specified result value is null.");
+
+    public Error(string code, string message)
     {
-        private Error(
-        string code,
-        string description,
-        ErrorType errorType
-    )
+        Code = code;
+        Message = message;
+    }
+
+    public string Code { get; }
+
+    public string Message { get; }
+
+    public static implicit operator string(Error error) => error.Code;
+
+    public static bool operator ==(Error? a, Error? b)
+    {
+        if (a is null && b is null)
         {
-            Code = code;
-            Description = description;
-            ErrorType = errorType;
+            return true;
         }
 
-        public string Code { get; }
+        if (a is null || b is null)
+        {
+            return false;
+        }
 
-        public string Description { get; }
-
-        public ErrorType ErrorType { get; }
-
-        public static Error Failure(string code, string description) =>
-            new(code, description, ErrorType.Failure);
-
-        public static Error NotFound(string code, string description) =>
-            new(code, description, ErrorType.NotFound);
-
-        public static Error Validation(string code, string description) =>
-            new(code, description, ErrorType.Validation);
-
-        public static Error Conflict(string code, string description) =>
-            new(code, description, ErrorType.Conflict);
-
-        public static Error AccessUnAuthorized(string code, string description) =>
-            new(code, description, ErrorType.AccessUnAuthorized);
-
-        public static Error AccessForbidden(string code, string description) =>
-            new(code, description, ErrorType.AccessForbidden);
+        return a.Equals(b);
     }
+
+    public static bool operator !=(Error? a, Error? b) => !(a == b);
+
+    public virtual bool Equals(Error? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        return Code == other.Code && Message == other.Message;
+    }
+
+    public override bool Equals(object? obj) => obj is Error error && Equals(error);
+
+    public override int GetHashCode() => HashCode.Combine(Code, Message);
+
+    public override string ToString() => Code;
 }

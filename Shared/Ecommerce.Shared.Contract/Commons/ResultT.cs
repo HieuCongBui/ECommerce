@@ -1,36 +1,20 @@
-﻿namespace Ecommerce.Shared.Contract.Commons
+﻿namespace Ecommerce.Shared.Contract.Commons;
+
+public class Result<TValue> : Result
 {
-    public class ResultT<TValue> : Result
+    private readonly TValue? _value;
+    private readonly string _errorMessage;
+
+    protected internal Result(TValue? value, bool isSuccess, Error error)
+        : base(isSuccess, error)
     {
-        private readonly TValue? _value;
-
-        private ResultT(
-            TValue value
-        ) : base()
-        {
-            _value = value;
-        }
-
-        private ResultT(
-            Error error
-        ) : base(error)
-        {
-            _value = default;
-        }
-
-        public TValue Value =>
-            IsSuccess ? _value! : throw new InvalidOperationException("Value can not be accessed when IsSuccess is false");
-
-        public static implicit operator ResultT<TValue>(Error error) =>
-            new(error);
-
-        public static implicit operator ResultT<TValue>(TValue value) =>
-            new(value);
-
-        public static ResultT<TValue> Success(TValue value) =>
-            new(value);
-
-        public static new ResultT<TValue> Failure(Error error) =>
-            new(error);
+        _value = value;
+        _errorMessage = error.Message;
     }
+
+    public TValue Value => IsSuccess
+        ? _value!
+        : throw new InvalidOperationException(_errorMessage ?? "The value of a failure result can not be accessed.");
+
+    public static implicit operator Result<TValue>(TValue? value) => Create(value);
 }

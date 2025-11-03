@@ -9,7 +9,7 @@
     <Folder Include="Extensions\" />
     <Folder Include="Features\Commands\" />
     <Folder Include="Features\Queries\" />
-    <Folder Include="DTOs\" />
+    <Folder Include="Responses\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 

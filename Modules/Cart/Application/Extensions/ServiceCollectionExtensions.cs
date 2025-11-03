@@ -1,4 +1,4 @@
-using Ecommerce.Cart.Application.Validations;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ecommerce.Cart.Application.Extensions;
